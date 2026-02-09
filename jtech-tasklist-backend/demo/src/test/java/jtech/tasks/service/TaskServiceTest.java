@@ -135,14 +135,14 @@ class TaskServiceTest {
     void findAll_whenStatusNull_callsFindAll() {
         TaskFilterRequest filter = new TaskFilterRequest(null, 10, 0, "", "", "");
         Page<Task> page = new PageImpl<>(List.of(new Task(), new Task()));
-        Pageable pageable = PageRequest.of(filter.pageNumber(), filter.pageSize());
 
-        when(taskRepository.findAll(pageable)).thenReturn(page);
+        when(taskRepository.findAllByDeletedFalse(any(Pageable.class))).thenReturn(page);
 
         Page<Task> result = taskService.findAll(filter);
 
+        assertNotNull(result, "O service retornou null! Verifique o mock no teste.");
         assertEquals(2, result.getContent().size());
-        verify(taskRepository).findAll(pageable);
+        verify(taskRepository).findAllByDeletedFalse(any(Pageable.class));
         verify(taskRepository, never()).findByStatusAndDeletedFalse(any(), any());
     }
 

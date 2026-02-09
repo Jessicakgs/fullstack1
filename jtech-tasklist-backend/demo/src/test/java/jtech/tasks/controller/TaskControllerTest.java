@@ -71,7 +71,7 @@ class TaskControllerTest {
         assertEquals(200, resp.getStatusCode().value());
         TaskResponse body = (TaskResponse) resp.getBody();
         assertEquals("title", body.title());
-        assertEquals("DONE", body.status());
+        assertEquals(TaskStatus.COMPLETED.name(), body.status());
         verify(mockService).update(id, request);
     }
 
@@ -129,7 +129,7 @@ class TaskControllerTest {
         assertEquals(200, resp.getStatusCode().value());
         TaskResponse body = resp.getBody();
         assertEquals("x", body.title());
-        assertEquals("DONE", body.status());
+        assertEquals(TaskStatus.COMPLETED.name(), body.status());
         verify(mockService).findById(id);
     }
 
