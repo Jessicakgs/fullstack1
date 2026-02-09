@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, CircularProgress, Typography } from "@mui/material";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import FilterSelect from "./components/FilterSelect";
@@ -8,7 +8,8 @@ import TaskList from "./components/TaskList";
 import NewTaskDialog from "./components/NewTaskDialog";
 import TaskDetailsDrawer from "./components/TaskDetailsDrawer";
 
-type Task = {
+import { useTasks, useCreateTask, type TaskResponse } from "./hooks/useTasks";
+type UiTask = {
   id: number;
   title: string;
   description: string;
@@ -16,65 +17,76 @@ type Task = {
 };
 
 export const App: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      title: "Comprar suprimentos",
-      description: "Canetas e papel",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      title: "Enviar relatório",
-      description: "Relatório mensal",
-      status: "Completed",
-    },
-    {
-      id: 3,
-      title: "Reunião com equipe",
-      description: "Planejamento Q2",
-      status: "In Progress",
-    },
-  ]);
-
-  const [filter, setFilter] = useState<any>("all");
+  const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
-
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<UiTask | null>(null);
+
+  const {
+    data: tasksPage,
+    isLoading,
+    isError,
+  } = useTasks({
+    title: query || undefined,
+    pageNumber: 0,
+    pageSize: 10,
+    status:
+      filter === "all"
+        ? undefined
+        : filter === "completed"
+          ? "COMPLETED"
+          : "PENDING",
+  });
+
+  const { mutate: createTask } = useCreateTask();
+
+  const mappedTasks: any[] = useMemo(() => {
+    if (!tasksPage?.content) return [];
+
+    return tasksPage.content.map((t: TaskResponse) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description || "",
+      status: t.status,
+    }));
+  }, [tasksPage]);
 
   const filteredTasks = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return tasks.filter((t) => {
+    return mappedTasks.filter((t) => {
       if (filter === "completed" && t.status !== "Completed") return false;
       if (filter === "uncompleted" && t.status === "Completed") return false;
-
-      if (!q) return true;
-      return (
-        t.title.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q) ||
-        t.status.toLowerCase().includes(q)
-      );
+      return true;
     });
-  }, [tasks, filter, query]);
+  }, [mappedTasks, filter]);
 
-  const completedCount = tasks.filter((t) => t.status === "Completed").length;
+  const completedCount = mappedTasks.filter(
+    (t) => t.status === "Completed",
+  ).length;
+  const totalCount = tasksPage?.totalElements || 0;
 
   const openNewTaskModal = useCallback(() => setIsNewTaskOpen(true), []);
   const closeNewTaskModal = useCallback(() => setIsNewTaskOpen(false), []);
 
   const handleSaveNewTask = useCallback(
-    (taskData: Omit<Task, "id">) => {
-      const nextId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-      const newTask: Task = { id: nextId, ...taskData };
-      setTasks((prev) => [newTask, ...prev]);
-      setIsNewTaskOpen(false);
+    (taskData: any) => {
+      createTask(
+        {
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+        },
+        {
+          onSuccess: () => {
+            setIsNewTaskOpen(false);
+          },
+        },
+      );
     },
-    [tasks],
+    [createTask],
   );
 
   const handleTaskClick = useCallback(
-    (task: Task) => setSelectedTask(task),
+    (task: UiTask) => setSelectedTask(task),
     [],
   );
   const closeDrawer = useCallback(() => setSelectedTask(null), []);
@@ -91,7 +103,7 @@ export const App: React.FC = () => {
         gap: 4,
       }}
     >
-      <Header total={tasks.length} completed={completedCount} />
+      <Header total={totalCount} completed={completedCount} />
 
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -107,7 +119,15 @@ export const App: React.FC = () => {
         <NewTaskButton onClick={openNewTaskModal} />
       </Stack>
 
-      <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
+      {isLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <CircularProgress />
+        </Box>
+      ) : isError ? (
+        <Typography color="error">Erro ao carregar tarefas.</Typography>
+      ) : (
+        <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
+      )}
 
       <NewTaskDialog
         open={isNewTaskOpen}
