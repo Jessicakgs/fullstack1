@@ -1,18 +1,12 @@
-import { useMemo, useState } from "react";
-import {
-  Box,
-  OutlinedInput,
-  Select,
-  Typography,
-  MenuItem,
-  Button,
-  InputAdornment,
-  IconButton,
-  Stack,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
-import AddIcon from "@mui/icons-material/Add";
+import { useCallback, useMemo, useState } from "react";
+import { Box, Stack } from "@mui/material";
+import Header from "./components/Header";
+import SearchBar from "./components/SearchBar";
+import FilterSelect from "./components/FilterSelect";
+import NewTaskButton from "./components/NewTaskButton";
+import TaskList from "./components/TaskList";
+import NewTaskDialog from "./components/NewTaskDialog";
+import TaskDetailsDrawer from "./components/TaskDetailsDrawer";
 
 type Task = {
   id: number;
@@ -21,36 +15,8 @@ type Task = {
   status: "Pending" | "Completed" | "In Progress";
 };
 
-function TaskItem({ task }: { task: Task }) {
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: 100,
-        border: 1,
-        padding: 2,
-        borderRadius: 2,
-        mb: 1,
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.5,
-      }}
-      role="listitem"
-      aria-label={`Tarefa ${task.title}`}
-    >
-      <Typography fontWeight={700} fontSize={18}>
-        {task.title}
-      </Typography>
-      <Typography color="text.secondary" component="span">
-        {task.description}
-      </Typography>
-      <Typography component="span">{task.status}</Typography>
-    </Box>
-  );
-}
-
-export default function App() {
-  const [tasks] = useState<Task[]>([
+export const App: React.FC = () => {
+  const [tasks, setTasks] = useState<Task[]>([
     {
       id: 1,
       title: "Comprar suprimentos",
@@ -71,10 +37,11 @@ export default function App() {
     },
   ]);
 
-  const [filter, setFilter] = useState<"all" | "completed" | "uncompleted">(
-    "all",
-  );
+  const [filter, setFilter] = useState<any>("all");
   const [query, setQuery] = useState("");
+
+  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const filteredTasks = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -93,6 +60,25 @@ export default function App() {
 
   const completedCount = tasks.filter((t) => t.status === "Completed").length;
 
+  const openNewTaskModal = useCallback(() => setIsNewTaskOpen(true), []);
+  const closeNewTaskModal = useCallback(() => setIsNewTaskOpen(false), []);
+
+  const handleSaveNewTask = useCallback(
+    (taskData: Omit<Task, "id">) => {
+      const nextId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+      const newTask: Task = { id: nextId, ...taskData };
+      setTasks((prev) => [newTask, ...prev]);
+      setIsNewTaskOpen(false);
+    },
+    [tasks],
+  );
+
+  const handleTaskClick = useCallback(
+    (task: Task) => setSelectedTask(task),
+    [],
+  );
+  const closeDrawer = useCallback(() => setSelectedTask(null), []);
+
   return (
     <Box
       sx={{
@@ -105,86 +91,33 @@ export default function App() {
         gap: 4,
       }}
     >
-      <Box>
-        <Typography variant="h1" sx={{ fontSize: 30, fontWeight: "bold" }}>
-          Tasks
-        </Typography>
-        <Typography sx={{ fontSize: 20 }}>
-          {tasks.length} tasks - {completedCount} completed
-        </Typography>
-      </Box>
+      <Header total={tasks.length} completed={completedCount} />
 
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
         alignItems="center"
       >
-        <OutlinedInput
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search tasks..."
-          aria-label="Pesquisar tarefas"
-          sx={{ height: 40, minWidth: 280, flex: 1 }}
-          startAdornment={
-            <InputAdornment position="start" sx={{ ml: 0.5 }}>
-              <SearchIcon aria-hidden />
-            </InputAdornment>
-          }
-          endAdornment={
-            query ? (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="Limpar pesquisa"
-                  onClick={() => setQuery("")}
-                  edge="end"
-                  size="small"
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ) : undefined
-          }
+        <SearchBar
+          query={query}
+          onQueryChange={setQuery}
+          onClear={() => setQuery("")}
         />
-
-        <Select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as any)}
-          sx={{ height: 40, minWidth: 160 }}
-          inputProps={{ "aria-label": "Filtrar tarefas" }}
-        >
-          <MenuItem value="all">All</MenuItem>
-          <MenuItem value="completed">Completed</MenuItem>
-          <MenuItem value="uncompleted">Uncompleted</MenuItem>
-        </Select>
-
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{
-            height: 40,
-            backgroundColor: "black",
-            "&:hover": { backgroundColor: "rgba(0,0,0,0.85)" },
-          }}
-          aria-label="Criar nova tarefa"
-          onClick={() => {
-            alert(
-              "Abrir modal de nova tarefa (implemente conforme sua necessidade)",
-            );
-          }}
-        >
-          New Task
-        </Button>
+        <FilterSelect value={filter} onChange={setFilter} />
+        <NewTaskButton onClick={openNewTaskModal} />
       </Stack>
 
-      <Box width="100%" mt={1} role="list" aria-label="Lista de tarefas">
-        {filteredTasks.length === 0 ? (
-          <Typography color="text.secondary">
-            Nenhuma tarefa encontrada.
-          </Typography>
-        ) : (
-          filteredTasks.map((task) => <TaskItem key={task.id} task={task} />)
-        )}
-      </Box>
+      <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
+
+      <NewTaskDialog
+        open={isNewTaskOpen}
+        onClose={closeNewTaskModal}
+        onSave={handleSaveNewTask}
+      />
+
+      <TaskDetailsDrawer task={selectedTask} onClose={closeDrawer} />
     </Box>
   );
-}
+};
+
+export default App;
