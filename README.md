@@ -1,62 +1,118 @@
-# Desafio Técnico Fullstack 1 - JTech
+# 🚀 Task List Project - Full Stack
 
-## API RESTful para Gerenciamento de Tarefas
+Esta é uma aplicação completa para gerenciamento de tarefas, desenvolvida como um desafio técnico. O projeto foca em uma arquitetura moderna, escalável e com funcionalidades que vão além dos requisitos básicos, como exclusão lógica e paginação de dados.
 
-### Contextualização e Objetivo
-
-A **JTech** busca identificar profissionais que demonstrem sólido conhecimento nos fundamentos do desenvolvimento backend. Este desafio técnico foi elaborado para avaliar suas competências na construção de APIs RESTful utilizando Java e Spring Boot.
-
-**Objetivo:** Desenvolver uma API completa para gerenciamento de tarefas (TODO List), aplicando boas práticas de desenvolvimento, arquitetura limpa e documentação técnica de qualidade.
-
-## Especificações Técnicas
-
-### Requisitos Funcionais
-
-1. **Criar Tarefa**: Endpoint `POST /tasks` para adicionar uma nova tarefa. A tarefa deve conter título, descrição e status (ex: "pendente", "concluída").
-2. **Listar Tarefas**: Endpoint `GET /tasks` para retornar todas as tarefas cadastradas.
-3. **Buscar Tarefa por ID**: Endpoint `GET /tasks/{id}` para obter os detalhes de uma tarefa específica.
-4. **Atualizar Tarefa**: Endpoint `PUT /tasks/{id}` para atualizar o título, a descrição ou o status de uma tarefa.
-5. **Deletar Tarefa**: Endpoint `DELETE /tasks/{id}` para remover uma tarefa do sistema.
-
-### Requisitos Não Funcionais
-
-1. **Persistência de Dados**: As tarefas devem ser armazenadas em banco de dados. Recomenda-se H2 (em memória) para simplificação ou PostgreSQL para demonstrar conhecimento em bancos relacionais.
-2. **Validação de Dados**: Implementar validação robusta das entradas do usuário (ex: título da tarefa obrigatório e não vazio).
-3. **Tratamento de Erros**: A API deve retornar códigos de status HTTP apropriados e mensagens de erro claras (ex: 404 para tarefa não encontrada, 400 para dados inválidos).
-
-### Stack Tecnológica Obrigatória
-
-* **Linguagem**: Java
-* **Framework**: Spring Boot
-* **Persistência**: Spring Data JPA com Hibernate
-* **Banco de Dados**: H2 (em memória) ou PostgreSQL
-* **Testes**: Testes unitários com JUnit/Mockito.
-
-## Critérios de Avaliação
-
-* **Qualidade e Organização do Código**: Código limpo, legível e seguindo as convenções do Java.
-* **Aplicação de Boas Práticas**: Utilização de princípios como Clean Code e KISS.
-* **Funcionalidade**: Todos os endpoints devem funcionar conforme especificado.
-* **Testes Automatizados**: Cobertura de testes unitários para as classes de serviço e controllers.
-* **Uso Adequado da Stack**: Configuração correta do Spring Boot, JPA e do banco de dados.
-* **Modelagem de Dados**: Estrutura da entidade `Task` bem definida.
-* **Controle de Versão**: Commits claros e lógicos no Git.
-
-## Expectativa de Entrega
-
-* **Prazo**: Até 3 dias corridos a partir do recebimento.
-* **Formato**: Entregar o código-fonte em um repositório Git, acompanhado de um `README.md` completo.
-
-### Estrutura Obrigatória do `README.md`
-
-1. **Visão Geral do Projeto**: Breve descrição da API e seus objetivos.
-2. **Stack Utilizada**: Lista das tecnologias implementadas.
-3. **Como Rodar Localmente**: Instruções para configurar o ambiente, instalar dependências e iniciar o servidor.
-4. **Como Rodar os Testes**: Comando para executar os testes.
-5. **Estrutura de Pastas**: Explicação da organização do projeto.
-6. **Decisões Técnicas**: Justificativas para as escolhas feitas (ex: por que usou H2 em vez de PostgreSQL).
-7. **Melhorias Futuras**: Sugestões para evoluir a API.
+🔗 **Repositório do Projeto:** [https://github.com/Jessicakgs/fullstack1](https://github.com/Jessicakgs/fullstack1)
 
 ---
 
-**Boa sorte! A JTech está ansiosa para conhecer sua solução.**
+## 🛠 Stack Utilizada
+
+### **Backend**
+
+- **Java 21 (LTS)**
+- **Spring Boot 3**
+- **Spring Data JPA**
+- **PostgreSQL:** Banco de dados relacional para persistência robusta.
+- **Bean Validation:** Validação rigorosa de dados de entrada.
+- **Maven:** Gerenciamento de dependências.
+
+### **Frontend**
+
+- **React (TypeScript)**
+- **Vite:** Build system ultra-rápido.
+- **Material UI (MUI):** Design system para uma interface profissional e responsiva.
+- **TanStack Query (React Query):** Sincronização de estado do servidor e cache eficiente.
+- **Axios:** Cliente HTTP.
+
+---
+
+## 📂 Estrutura de Pastas
+
+O projeto utiliza uma estrutura clara e padronizada para facilitar a manutenção:
+
+### **[Backend]** `jtech-tasklist-backend/demo`
+
+- `config`: Configurações globais (CORS, Beans).
+- `controller`: Endpoints REST da API.
+- `service`: Camada de lógica de negócio (onde residem as regras de Soft Delete e Paginação).
+- `repository`: Abstração de acesso ao banco de dados.
+- `domain`: Entidades que representam o modelo de dados.
+- `dto`: Objetos de transferência para segurança e performance.
+
+### **[Frontend]** `jtech-tasklist-frontend/front`
+
+- `api`: Serviços de comunicação com o backend.
+- `components`: Componentes reutilizáveis da interface.
+- `hooks`: Lógica extraída e integração com TanStack Query.
+- `assets`: Estilos e recursos estáticos.
+
+---
+
+## ⚙️ Como Rodar Localmente
+
+### **Pré-requisitos**
+
+- JDK 21 instalado.
+- Node.js (versão 18 ou superior).
+- PostgreSQL ativo ou Docker instalado.
+
+### **Passo a Passo**
+
+1.  **Clone o repositório:**
+
+    ```bash
+    git clone [https://github.com/Jessicakgs/fullstack1.git](https://github.com/Jessicakgs/fullstack1.git)
+    ```
+
+2.  **Configurar e Rodar o Backend:**
+    O projeto inclui um arquivo `docker-compose.yml` para facilitar a subida do banco de dados.
+
+    ```bash
+    cd jtech-tasklist-backend/demo
+    docker-compose up -d # Para subir o banco PostgreSQL
+    ./mvnw spring-boot:run
+    ```
+
+    A API estará em: `http://localhost:8080`
+
+3.  **Configurar e Rodar o Frontend:**
+    ```bash
+    cd jtech-tasklist-frontend/front
+    npm install # ou yarn install
+    npm run dev # ou yarn dev
+    ```
+    O frontend estará em: `http://localhost:5173`
+
+---
+
+## 🧪 Como Rodar os Testes
+
+Para garantir que as regras de negócio estão íntegras:
+
+**Backend:**
+
+```bash
+./mvnw test
+```
+
+## 🧠 Decisões Técnicas & Diferenciais
+
+- **Java 21:** Utilização da versão LTS mais recente para aproveitar as melhorias de performance e sintaxe.
+- **PostgreSQL:** Escolhido como banco de dados principal para simular um ambiente de produção real e persistência duradoura.
+- **Soft Delete (Exclusão Lógica):** Implementado para garantir a integridade dos dados e permitir a recuperação de informações, mantendo um histórico no banco sem remover fisicamente o registro. (**Feature extra**).
+- **Paginação de Dados:** Implementada nos endpoints de listagem para garantir que a aplicação continue performática mesmo com grandes volumes de tarefas. (**Feature extra**).
+- **TanStack Query:** Utilizado para gerenciar estados assíncronos, proporcionando uma experiência de usuário sem "loaders" excessivos através do cache inteligente.
+- **DTO Pattern:** Utilizado para desvincular o modelo de banco de dados da camada de visualização, garantindo que apenas os dados necessários sejam trafegados.
+
+---
+
+## 🚀 Melhorias Futuras
+
+- **Autenticação e Autorização:** Implementar Spring Security com JWT para proteção de rotas.
+- **Testes E2E:** Adicionar testes de ponta a ponta com Cypress no frontend.
+- **Documentação:** Integrar Swagger/OpenAPI para facilitar o consumo da API por terceiros.
+
+---
+
+Feito com ❤️ por Jessica
