@@ -56,7 +56,7 @@ class TaskControllerTest {
     @Test
     void update_returnsOkResponse() {
         Long id = 2L;
-        TaskRequest request = new TaskRequest("title", "desc", "done");
+        TaskRequest request = new TaskRequest("title", "desc", TaskStatus.COMPLETED);
 
         Task updated = new Task();
         updated.setId(id);
@@ -98,7 +98,7 @@ class TaskControllerTest {
         Page<Task> page = new PageImpl<>(List.of(t1), PageRequest.of(0, 10), 1);
         when(mockService.findAll(any(TaskFilterRequest.class))).thenReturn(page);
 
-        TaskFilterRequest filter = new TaskFilterRequest(null, PageRequest.of(0, 10));
+        TaskFilterRequest filter = new TaskFilterRequest(null, 10, 0, "", "", "");
         ResponseEntity<?> resp = controller.findAll(filter);
 
         assertEquals(200, resp.getStatusCode().value());

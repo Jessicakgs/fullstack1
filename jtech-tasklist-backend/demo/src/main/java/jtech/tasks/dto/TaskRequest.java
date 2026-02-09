@@ -1,6 +1,7 @@
 package jtech.tasks.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jtech.tasks.domain.TaskStatus;
 
 public record TaskRequest(
         @NotBlank(message = "The title is mandatory.")
@@ -8,5 +9,5 @@ public record TaskRequest(
 
         String description,
 
-        String status
+        TaskStatus status
 ) {}

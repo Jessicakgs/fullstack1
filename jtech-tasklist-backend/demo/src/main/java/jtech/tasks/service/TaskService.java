@@ -8,6 +8,8 @@ import jtech.tasks.dto.TaskRequest;
 import jtech.tasks.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -26,7 +28,7 @@ public class TaskService {
         task.setTitle(request.title());
         task.setDescription(request.description());
 
-        TaskStatus status = request.status() == null || request.status().isBlank() ? TaskStatus.PENDING : TaskStatus.valueOf(request.status().toUpperCase());
+        TaskStatus status = ObjectUtils.isEmpty(request.status()) ? TaskStatus.PENDING : request.status();
 
         task.setStatus(status);
 
@@ -40,7 +42,7 @@ public class TaskService {
         task.setTitle(request.title());
         task.setDescription(request.description());
 
-        TaskStatus status = request.status() == null || request.status().isBlank() ? TaskStatus.PENDING : TaskStatus.valueOf(request.status().toUpperCase());
+        TaskStatus status = ObjectUtils.isEmpty(request.status()) ? TaskStatus.PENDING : request.status();
 
         task.setStatus(status);
 
@@ -56,10 +58,11 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public Page<Task> findAll(TaskFilterRequest filterRequest) {
+        Pageable pageable = PageRequest.of(filterRequest.pageNumber(), filterRequest.pageSize());
         if (ObjectUtils.isEmpty(filterRequest.status())) {
-            return taskRepository.findAll(filterRequest.pageable());
+            return taskRepository.findAllByDeletedFalse(pageable);
         }
-        return taskRepository.findAllByStatusIs(filterRequest.pageable(), filterRequest.status());
+        return taskRepository.findByStatusAndDeletedFalse(filterRequest.status(), pageable);
     }
 
     @Transactional(readOnly = true)

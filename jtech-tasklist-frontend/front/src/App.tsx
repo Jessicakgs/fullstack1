@@ -51,16 +51,8 @@ export const App: React.FC = () => {
     }));
   }, [tasksPage]);
 
-  const filteredTasks = useMemo(() => {
-    return mappedTasks.filter((t) => {
-      if (filter === "completed" && t.status !== "Completed") return false;
-      if (filter === "uncompleted" && t.status === "Completed") return false;
-      return true;
-    });
-  }, [mappedTasks, filter]);
-
   const completedCount = mappedTasks.filter(
-    (t) => t.status === "Completed",
+    (t) => t.status === "COMPLETED",
   ).length;
   const totalCount = tasksPage?.totalElements || 0;
 
@@ -126,7 +118,7 @@ export const App: React.FC = () => {
       ) : isError ? (
         <Typography color="error">Erro ao carregar tarefas.</Typography>
       ) : (
-        <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
+        <TaskList tasks={mappedTasks} onTaskClick={handleTaskClick} />
       )}
 
       <NewTaskDialog

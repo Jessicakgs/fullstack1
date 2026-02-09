@@ -54,7 +54,7 @@ class TaskServiceTest {
 
     @Test
     void create_whenStatusProvided_setsCorrectStatus() {
-        TaskRequest request = new TaskRequest("T", "D", "done");
+        TaskRequest request = new TaskRequest("T", "D", TaskStatus.COMPLETED);
         Task saved = new Task();
         saved.setId(2L);
         saved.setTitle("T");
@@ -78,7 +78,7 @@ class TaskServiceTest {
         existing.setDescription("old");
         existing.setStatus(TaskStatus.PENDING);
 
-        TaskRequest request = new TaskRequest("new title", "new desc", "done");
+        TaskRequest request = new TaskRequest("new title", "new desc", TaskStatus.COMPLETED);
 
         when(taskRepository.findById(id)).thenReturn(Optional.of(existing));
         when(taskRepository.save(any(Task.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -96,7 +96,7 @@ class TaskServiceTest {
     void update_whenNotFound_throwsEntityNotFoundException() {
         Long id = 99L;
         when(taskRepository.findById(id)).thenReturn(Optional.empty());
-        TaskRequest request = new TaskRequest("t", "d", "pending");
+        TaskRequest request = new TaskRequest("t", "d", TaskStatus.PENDING);
 
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> taskService.update(id, request));
         assertTrue(ex.getMessage().contains("Task not found with id"));
@@ -133,29 +133,31 @@ class TaskServiceTest {
 
     @Test
     void findAll_whenStatusNull_callsFindAll() {
-        TaskFilterRequest filter = new TaskFilterRequest(null, PageRequest.of(0, 10));
+        TaskFilterRequest filter = new TaskFilterRequest(null, 10, 0, "", "", "");
         Page<Task> page = new PageImpl<>(List.of(new Task(), new Task()));
+        Pageable pageable = PageRequest.of(filter.pageNumber(), filter.pageSize());
 
-        when(taskRepository.findAll(filter.pageable())).thenReturn(page);
+        when(taskRepository.findAll(pageable)).thenReturn(page);
 
         Page<Task> result = taskService.findAll(filter);
 
         assertEquals(2, result.getContent().size());
-        verify(taskRepository).findAll(filter.pageable());
-        verify(taskRepository, never()).findAllByStatusIs(any(), any());
+        verify(taskRepository).findAll(pageable);
+        verify(taskRepository, never()).findByStatusAndDeletedFalse(any(), any());
     }
 
     @Test
     void findAll_whenStatusProvided_callsFindAllByStatusIs() {
-        TaskFilterRequest filter = new TaskFilterRequest(TaskStatus.COMPLETED, PageRequest.of(0, 5));
+        TaskFilterRequest filter = new TaskFilterRequest(TaskStatus.COMPLETED, 10, 0, "", "", "");
         Page<Task> page = new PageImpl<>(Collections.singletonList(new Task()));
+        Pageable pageable = PageRequest.of(filter.pageNumber(), filter.pageSize());
 
-        when(taskRepository.findAllByStatusIs(filter.pageable(), filter.status())).thenReturn(page);
+        when(taskRepository.findByStatusAndDeletedFalse(filter.status(), pageable)).thenReturn(page);
 
         Page<Task> result = taskService.findAll(filter);
 
         assertEquals(1, result.getContent().size());
-        verify(taskRepository).findAllByStatusIs(filter.pageable(), filter.status());
+        verify(taskRepository).findByStatusAndDeletedFalse(filter.status(), pageable);
         verify(taskRepository, never()).findAll(any(Pageable.class));
     }
 

@@ -19,13 +19,13 @@ const NewTaskDialog: React.FC<{
 }> = ({ open, onClose, onSave }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<any["status"]>("Pending");
+  const [status, setStatus] = useState<any>("PENDING");
 
   React.useEffect(() => {
     if (open) {
       setTitle("");
       setDescription("");
-      setStatus("Pending");
+      setStatus("PENDING");
     }
   }, [open]);
 
@@ -69,9 +69,8 @@ const NewTaskDialog: React.FC<{
             fullWidth
             inputProps={{ "aria-label": "Status da tarefa" }}
           >
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Completed">Completed</MenuItem>
+            <MenuItem value="PENDING">Pending</MenuItem>
+            <MenuItem value="COMPLETED">Completed</MenuItem>
           </Select>
         </Stack>
       </DialogContent>

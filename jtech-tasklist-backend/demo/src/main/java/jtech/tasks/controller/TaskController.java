@@ -41,8 +41,8 @@ public class TaskController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
-    public ResponseEntity<Page<TaskResponse>> findAll(TaskFilterRequest filterRequest) {
+    @PostMapping("/search")
+    public ResponseEntity<Page<TaskResponse>> findAll(@RequestBody TaskFilterRequest filterRequest) {
         Page<Task> tasks = taskService.findAll(filterRequest);
         Page<TaskResponse> response = tasks.map(TaskResponse::from);
         return ResponseEntity.ok(response);
